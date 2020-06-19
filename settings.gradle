@@ -1,2 +1,2 @@
 include ':app'
-rootProject.name='LivecData_Example'
+rootProject.name='mvvm_example'

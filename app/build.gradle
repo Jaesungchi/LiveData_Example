@@ -7,7 +7,7 @@ apply plugin: 'kotlin-android-extensions'
 android {
     compileSdkVersion 29
     defaultConfig {
-        applicationId "com.kotlin.jaesungchi.livecdata_example"
+        applicationId "com.kotlin.jaesungchi.mvvm_example"
         minSdkVersion 26
         targetSdkVersion 29
         versionCode 1

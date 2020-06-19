@@ -1,4 +1,4 @@
-package com.kotlin.jaesungchi.livecdata_example
+package com.kotlin.jaesungchi.mvvm_example
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
