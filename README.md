@@ -79,3 +79,48 @@ implementation "org.koin:koin-androidx-viewmodel:$koin_version"
 - espresso : 안드로이드 UI를 테스트하는데 도움을 주는 라이브러리
 - mockito : JUnit 위에서 동작하며 Mocking, Verification, Stubbing 을 도와 주는 라이브러리
 - koin : DI(의존성 주입) 을 위한 라이브러리
+
+## DI 설정
+
+```kotlin
+var networkModule = module{
+    single { Cache(androidApplication().cacheDir,10L * 1024 * 1024) }
+
+    single {GsonBuilder().create()}
+
+    single{
+        OkHttpClient.Builder().apply{
+            cache(get())
+            connectTimeout(CONNECT_TIMEOUT,TimeUnit.SECONDS)
+            writeTimeout(WRITE_TIMEOUT, TimeUnit.SECONDS)
+            readTimeout(READ_TIMEOUT, TimeUnit.SECONDS)
+            retryOnConnectionFailure(true)
+            addInterceptor(HttpLoggingInterceptor().apply{
+                if(BuildConfig.DEBUG)
+                    level = HttpLoggingInterceptor.Level.BODY
+            })
+        }.build()
+    }
+
+    single {
+        Retrofit.Builder()
+            .baseUrl("https://api.github.com")
+            .addConverterFactory(GsonConverterFactory.create(get()))
+            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+            .client(get())
+            .build()
+    }
+
+    single{
+        Interceptor {chain ->
+            chain.proceed(chain.request().newBuilder().apply{
+                header("Accept","application/vnd.github.mercy-preview+json")
+            }.build())
+        }
+    }
+}
+```
+
+여기서 single은 single Instance만 제공한다. 만약 매번 새로운 객체를 생성하려면 factory로 선언하면 된다.
+
+코틀린이 스스로 타입을 추정하여 의존성을 주입하기 때문에 생략해도 된다.
