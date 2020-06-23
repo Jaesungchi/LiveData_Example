@@ -45,3 +45,68 @@ implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
 implementation 'androidx.lifecycle:lifecycle-common-java8:2.3.0-alpha04'
 implementation 'androidx.lifecycle:lifecycle-compiler:2.3.0-alpha04'
 ```
+
+## 2. Room 생성 :book:
+
+연락처 리스트를 저장할 Room 을 만든다. 기존에 만들었던 경험이 있어서 자세한 설명은 넘긴다.
+
+```kotlin
+data class Contact(
+    @PrimaryKey(autoGenerate = true)
+    var id : Long?,
+    @ColumnInfo(name = "name")
+    var name:String,
+    @ColumnInfo(name = "number")
+    var number:String,
+    @ColumnInfo(name="initial")
+    var initial:Char)
+    {
+    constructor() : this(null,"","",'\u0000')
+}
+```
+
+- Contact.kt : Entity (데이터 테이블)
+
+```kotlin
+@Dao
+interface ContactDao{
+    @Query("SELECT * FROM contact ORDER BY name ASC")
+    fun getAll() : LiveData<List<Contact>>
+    
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insert(contact : Contact)
+    
+    @Delete
+    fun delete(contact : Contact)
+}
+```
+
+- ContactDao.kt : SQL을 위한 DAO 인터페이스 클래스.
+
+```kotlin
+@Database(entities = [Contact::class], version = 1)
+abstract class ContactDatabase : RoomDatabase(){
+    abstract fun contactDao() : ContactDao
+    companion object{
+        private var INSTANCE : ContactDatabase? = null
+
+        fun getInstance(context: Context): ContactDatabase?{
+            if(INSTANCE == null){
+                synchronized(ContactDatabase::class){
+                    INSTANCE = Room.databaseBuilder(context.applicationContext,
+                        ContactDatabase::class.java,"contact")
+                        .fallbackToDestructiveMigration()
+                        .build()
+                }
+            }
+            return INSTANCE
+        }
+    }
+}
+```
+
+- ContactDatabase.kt : 데이터 베이스 클래스이다.
+
+  클래스 위에 @Database 어노테이션을 사용해 SQLite 버전을 지정한다.
+
+  또한 Singletone으로 사용하기 위해 companion object를 사용하였다.(여기서 synchronized를 이용해 여러 스레드가 접근하지 못하도록 한다.)
