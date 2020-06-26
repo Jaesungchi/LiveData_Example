@@ -149,3 +149,24 @@ class ContactRepository (application : Application){
 ```
 
 - ContactRepository.kt : 레퍼지토리는 ViewModel에서 DB에 접근을 요청할 때 수행할 함수를 만들어준다. 따라서 Database, Dao, contacts를 만들고 초기화 해준다.
+
+## 4. ViewModel 생성
+
+```kotlin
+class ContactViewModel (application: Application) : AndroidViewModel(application){
+    private val repository = ContactRepository(application)
+    private val contacts = repository.getAll()
+    
+    fun getAll() : LiveData<List<Contact>> = this.contacts
+    
+    fun insert(contact : Contact) = repository.insert(contact)
+    
+    fun delete(contact :Contact) = repository.delete(contact)
+}
+```
+
+- ContactViewModel.kt : AndroidViewModel을 상속받는다.
+
+  여기서 파라미터를 Application으로 받는데. 그 이유는 Room DB 를 만들기 위해서 Context가 필요하다, 하지만 만약 ViewModel이 **액티비티의 Context를 쓰면 액티비티가 destroy된 경우 메모리 릭**이 발생 할 수 있다. 따라 서 Application Context를 사용하기 위해 Application을 인자로 준다.
+
+  
