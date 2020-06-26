@@ -22,7 +22,9 @@ MVVM 패턴은 Model - View - ViewModel의 약자로, 기존의 MVP 패턴에서
 
 MVVM 패턴을 만드는데 AAC를 꼭 사용해야 하는 것은 아니지만 AAC를 사용하면 LifeCycle이나 기타 귀찮은 것들을 처리해주기 때문에 이번 기회에 한번 사용을 해본다.
 
+이번 예제에서는 아래 그림을 따른다!
 
+![img](https://codelabs.developers.google.com/codelabs/android-room-with-a-view-kotlin/img/a7da8f5ea91bac52.png)
 
 # 본격 개발!
 
@@ -109,4 +111,41 @@ abstract class ContactDatabase : RoomDatabase(){
 
   클래스 위에 @Database 어노테이션을 사용해 SQLite 버전을 지정한다.
 
-  또한 Singletone으로 사용하기 위해 companion object를 사용하였다.(여기서 synchronized를 이용해 여러 스레드가 접근하지 못하도록 한다.)
+  또한 Singletone으로 사용하기 위해 companion object를 사용하였다.
+  
+  (**여기서 synchronized를 이용해 여러 스레드가 접근하지 못하도록 한다**.)
+
+## 3. Repository 생성
+
+```kotlin
+class ContactRepository (application : Application){
+
+    private val contactDatabase = ContactDatabase.getInstance(application)!!
+    private val contactDao = contactDatabase.contactDao()
+    private val contacts = contactDao.getAll()
+
+    fun getAll() : LiveData<List<Contact>> = contacts
+
+    fun insert(contact: Contact){
+        try{
+            val thread = Thread(Runnable { 
+                contactDao.insert(contact)
+            })
+            thread.start()
+        }catch(e:Exception){
+        }
+    }
+    
+    fun delete(contact:Contact){
+        try {
+            val thread = Thread(Runnable { 
+                contactDao.delete(contact)
+            })
+            thread.start()
+        }catch (e:Exception){
+        }
+    }
+}
+```
+
+- ContactRepository.kt : 레퍼지토리는 ViewModel에서 DB에 접근을 요청할 때 수행할 함수를 만들어준다. 따라서 Database, Dao, contacts를 만들고 초기화 해준다.
