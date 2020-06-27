@@ -169,4 +169,27 @@ class ContactViewModel (application: Application) : AndroidViewModel(application
 
   여기서 파라미터를 Application으로 받는데. 그 이유는 Room DB 를 만들기 위해서 Context가 필요하다, 하지만 만약 ViewModel이 **액티비티의 Context를 쓰면 액티비티가 destroy된 경우 메모리 릭**이 발생 할 수 있다. 따라 서 Application Context를 사용하기 위해 Application을 인자로 준다.
 
-  
+## 5. MainActivity 설정
+
+```kotlin
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var contactViewModel: ContactViewModel
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        contactViewModel = ViewModelProviders.of(this).get(ContactViewModel::class.java)
+        contactViewModel.getAll().observe(this, Observer<List<Contact>> { contacts ->
+            //UI 업데이트 부분
+        })
+    }
+}
+```
+
+- MainActivity.kt :
+
+  뷰 모델의 객체는 직접만드는 것이 아닌 안드로이드 시스템(ViewModelProviders)을 통해 만든다. 그 이유는 만약 이미 만든 ViewModel 이 있다면 그것을 반환해 주기때문에 메모리릭을 방지한다.
+
+  이후 observer를 만들어 뷰모델이 어떤 액티비티의 생명주기를 관찰할지 정한다. 여기서 정한 액티비티가 destroy 되면 뷰 모델도 destroy된다.
