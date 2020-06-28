@@ -193,3 +193,6 @@ class MainActivity : AppCompatActivity() {
   뷰 모델의 객체는 직접만드는 것이 아닌 안드로이드 시스템(ViewModelProviders)을 통해 만든다. 그 이유는 만약 이미 만든 ViewModel 이 있다면 그것을 반환해 주기때문에 메모리릭을 방지한다.
 
   이후 observer를 만들어 뷰모델이 어떤 액티비티의 생명주기를 관찰할지 정한다. 여기서 정한 액티비티가 destroy 되면 뷰 모델도 destroy된다.
+
+## 6. RecyclerView 설정
+
